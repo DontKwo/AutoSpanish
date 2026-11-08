@@ -1,14 +1,19 @@
 # AutoSpanish
 
-Android app that turns a word, phrase, or sentence (Spanish or English) into a fully-annotated
-flashcard: correct article and gender for nouns, masculine/feminine forms for adjectives and
-professions, verb conjugations with irregularity flags, false-friend warnings, and more. Organized
-into reusable lists, each of which can be studied directly with flip cards or Quizlet-style Learn
-mode: there's no separate "flashcard set" concept to manage.
+Welcome to AutoSpanish! This Android app turns a word, phrase, or sentence (Spanish or English) into a fully-annotated flashcard: correct article and gender for nouns, masculine/feminine forms for adjectives and professions, verb conjugations with irregularity flags, false-friend warnings, and more. Organized into reusable lists, each of which can be studied directly with flip cards or Quizlet-style Learn mode: there's no separate "flashcard set" concept to manage.
 
 See `REQUIREMENTS.md` for the full feature spec this was built against.
 
 A pre-built debug APK is already included at the project root: `app-debug.apk`.
+
+## Quick Start
+
+1. **Install the App**: Install the `app-debug.apk` included in the root directory on your Android device (or emulator).
+2. **Translate and Learn**: Open the app and begin typing or scanning words/phrases to translate. AutoSpanish will automatically generate rich, grammar-annotated flashcards.
+3. **Study Lists**: Your generated words are saved to lists. Navigate to any list and start a study session immediately!
+4. **Documentation**: Check out the comprehensive documentation for more information:
+   - For usage details, refer to `docs/USER_GUIDE.md`.
+   - For common questions and technical details, see `docs/FAQ.md`.
 
 ## Opening the project in Android Studio
 
