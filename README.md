@@ -90,3 +90,7 @@ A word not found in the dictionary falls back to the on-device ML Kit translator
 the MyMemory API, with the same grammar rules applied automatically. When the direction is set to
 Auto and a single typed word can't be confidently placed in either language, the app asks directly
 rather than guessing.
+
+## Linguistic & Educational Disclaimer
+
+EDUCATIONAL DISCLAIMER: AutoSpanish is an open-source educational language learning framework. Linguistic models, vocabulary indices, and automated translations are provided AS IS without warranty of any kind.
