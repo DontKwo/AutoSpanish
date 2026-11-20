@@ -2,6 +2,7 @@ package com.autospanish.app.translate
 
 import com.autospanish.app.grammar.DictionaryEntry
 import com.autospanish.app.grammar.glossVariants
+import com.autospanish.app.grammar.stripAccents
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
@@ -20,12 +21,30 @@ object DictionaryTestFixture {
 
     val bySpanish: Map<String, DictionaryEntry> by lazy { entries.associateBy { it.spanish.lowercase() } }
 
+    val byUnaccentedSpanish: Map<String, DictionaryEntry> by lazy {
+        val map = mutableMapOf<String, DictionaryEntry>()
+        for (entry in entries) {
+            map.putIfAbsent(stripAccents(entry.spanish.lowercase()), entry)
+        }
+        map
+    }
+
     private val byInflectedForm: Map<String, DictionaryEntry> by lazy {
         val map = mutableMapOf<String, DictionaryEntry>()
         for (entry in entries) {
             entry.feminineForm?.let { map.putIfAbsent(it.lowercase(), entry) }
             entry.masculineForm?.let { map.putIfAbsent(it.lowercase(), entry) }
             entry.pluralForm?.let { map.putIfAbsent(it.lowercase(), entry) }
+        }
+        map
+    }
+
+    private val byUnaccentedInflected: Map<String, DictionaryEntry> by lazy {
+        val map = mutableMapOf<String, DictionaryEntry>()
+        for (entry in entries) {
+            entry.feminineForm?.let { map.putIfAbsent(stripAccents(it.lowercase()), entry) }
+            entry.masculineForm?.let { map.putIfAbsent(stripAccents(it.lowercase()), entry) }
+            entry.pluralForm?.let { map.putIfAbsent(stripAccents(it.lowercase()), entry) }
         }
         map
     }
@@ -46,6 +65,15 @@ object DictionaryTestFixture {
             val singular = lower.dropLast(1)
             bySpanish[singular]?.let { return it }
             byInflectedForm[singular]?.let { return it }
+        }
+        val unaccented = stripAccents(lower)
+        byUnaccentedSpanish[unaccented]?.let { return it }
+        byUnaccentedInflected[unaccented]?.let { return it }
+        stripReflexiveSuffix(unaccented)?.let { base -> byUnaccentedSpanish[base]?.let { return it } }
+        if (unaccented.endsWith("s")) {
+            val singular = unaccented.dropLast(1)
+            byUnaccentedSpanish[singular]?.let { return it }
+            byUnaccentedInflected[singular]?.let { return it }
         }
         return null
     }

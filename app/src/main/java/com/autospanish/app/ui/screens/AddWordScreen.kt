@@ -85,7 +85,7 @@ fun AddWordScreen(
         lastAddResult?.let { result ->
             val message = when (result) {
                 is com.autospanish.app.data.AddWordResult.Added -> "Added \"$lastSubmittedInput\""
-                is com.autospanish.app.data.AddWordResult.AlreadyExists -> "\"$lastSubmittedInput\" was already in your words — linked here"
+                is com.autospanish.app.data.AddWordResult.AlreadyExists -> "\"$lastSubmittedInput\" already exists: linked here"
                 is com.autospanish.app.data.AddWordResult.TranslationFailed -> "Couldn't translate that. Try being online, or check spelling."
             }
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -141,7 +141,7 @@ fun AddWordScreen(
                         modifier = Modifier.padding(end = 6.dp),
                     )
                     Text(
-                        "Offline — using on-device dictionary and downloaded models only.",
+                        "Offline: using on-device dictionary and downloaded models only.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error,
                     )
@@ -165,8 +165,8 @@ fun AddWordScreen(
 
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         DirectionOption("Auto", direction == TranslationDirection.AUTO) { direction = TranslationDirection.AUTO }
-                        DirectionOption("ES → EN", direction == TranslationDirection.ES_TO_EN) { direction = TranslationDirection.ES_TO_EN }
-                        DirectionOption("EN → ES", direction == TranslationDirection.EN_TO_ES) { direction = TranslationDirection.EN_TO_ES }
+                        DirectionOption("ES to EN", direction == TranslationDirection.ES_TO_EN) { direction = TranslationDirection.ES_TO_EN }
+                        DirectionOption("EN to ES", direction == TranslationDirection.EN_TO_ES) { direction = TranslationDirection.EN_TO_ES }
                     }
                 }
             }
@@ -196,7 +196,7 @@ fun AddWordScreen(
                                 strokeWidth = 2.dp,
                                 color = MaterialTheme.colorScheme.onPrimary,
                             )
-                            Text("Translating…")
+                            Text("Translating...")
                         } else {
                             Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
                             Text("Translate & Add")
@@ -252,7 +252,7 @@ fun AddWordScreen(
                                     strokeWidth = 2.dp,
                                     color = MaterialTheme.colorScheme.onPrimary,
                                 )
-                                Text("Adding…")
+                                Text("Adding...")
                             } else {
                                 Text("Add ${selectedWords.size} selected")
                             }

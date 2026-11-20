@@ -171,7 +171,7 @@ object GrammarEnricher {
         }
 
         val prepPairing = dictionaries.prepositionPairings[baseForLookup.lowercase()]?.let {
-            "${it.verb} ${it.preposition} — ${it.meaning}"
+            "${it.verb} ${it.preposition}: ${it.meaning}"
         }
         return EnrichedGrammar(
             isReflexive = isReflexive,

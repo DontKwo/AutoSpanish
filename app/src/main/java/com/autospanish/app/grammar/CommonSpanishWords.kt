@@ -1,12 +1,6 @@
 package com.autospanish.app.grammar
 
-/**
- * Several hundred high-frequency Spanish words (function words, top verbs, nouns, adjectives,
- * adverbs), used as a commonness signal when picking between multiple dictionary entries that
- * gloss the same English word. The scraped dictionary carries no frequency data of its own, and
- * its synonym cross-links are too noisy (often mutual, sometimes backwards) to infer commonness
- * from — this fills that gap.
- */
+/** High-frequency Spanish words for dictionary ranking. */
 val COMMON_SPANISH_WORDS: Set<String> = """
 el la los las un una unos unas de a en que y es se no te lo le da su por con para
 mi tu su nos les como más pero sus le ya o este sí porque esta entre cuando muy

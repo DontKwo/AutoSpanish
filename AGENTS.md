@@ -10,7 +10,7 @@
     *   `AppDatabase.kt`: Room database to store the user's generated flashcards and lists.
     *   `AssetDictionaries.kt`: Manages access to bundled JSON dictionary files (extracted from Wiktionary data).
 *   **Audio Pipeline:**
-    *   As per `REQUIREMENTS.md`, there is **no audio/pronunciation/TTS pipeline** anywhere in the application.
+    *   There is **no audio/pronunciation/TTS pipeline** anywhere in the application.
 *   **Test Runner:**
     *   The project uses standard JUnit tests.
     *   Tests can be executed via the Gradle wrapper command: `./gradlew test`

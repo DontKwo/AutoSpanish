@@ -25,7 +25,22 @@ data class WordEntity(
     val dateAdded: Long = System.currentTimeMillis(),
     val timesCorrect: Int = 0,
     val timesTried: Int = 0,
+    val nextReviewDate: Long = 0L,
+    val intervalDays: Int = 0,
+    val easeFactor: Float = 2.5f,
+    val repetitions: Int = 0,
+    val lapseCount: Int = 0,
+    val lastReviewedDate: Long = 0L,
 ) {
     val masteryPercent: Int
         get() = if (timesTried == 0) 0 else (timesCorrect * 100) / timesTried
+
+    val retentionRate: Float
+        get() = if (timesTried == 0) 0f else timesCorrect.toFloat() / timesTried
+
+    val isLeech: Boolean
+        get() = lapseCount >= 3 || (timesTried >= 4 && masteryPercent < 50)
+
+    val isDueForReview: Boolean
+        get() = timesTried > 0 && nextReviewDate > 0L && nextReviewDate <= System.currentTimeMillis()
 }

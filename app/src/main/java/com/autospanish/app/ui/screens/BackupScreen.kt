@@ -88,7 +88,7 @@ fun BackupScreen(viewModel: AppViewModel, onBack: () -> Unit) {
                 } else {
                     Icon(Icons.Filled.CloudUpload, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
                 }
-                Text(if (isBusy) "Working…" else "Export backup")
+                Text(if (isBusy) "Working..." else "Export backup")
             }
             OutlinedButton(
                 onClick = { restoreLauncher.launch(arrayOf("application/json")) },

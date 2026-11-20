@@ -55,7 +55,7 @@ class SenseResolverTest {
         // Neither spelling is a known-common word, so this exercises the tiebreak below that
         // signal. Linked by a synonym reference so they cluster as one sense.
         val enorme = entry("enorme", listOf("huge"), pos = "ADJECTIVE", synonyms = listOf("colosal"))
-        val colosal = entry("colosal", listOf("huge"), pos = "ADJECTIVE", exampleSentences = listOf("Es un edificio colosal. — It's a huge building."))
+        val colosal = entry("colosal", listOf("huge"), pos = "ADJECTIVE", exampleSentences = listOf("Es un edificio colosal. : It is a huge building."))
         val result = SenseResolver.resolve("huge", listOf(enorme, colosal))
         assertEquals("colosal", result.entry.spanish)
     }

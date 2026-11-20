@@ -36,13 +36,7 @@ private enum class QuizStage { MULTIPLE_CHOICE, TYPED }
 
 private const val BATCH_SIZE = 7
 
-/**
- * Per-word progress within a single Learn session. Not persisted — [AppViewModel.recordAnswer]
- * handles long-term mastery stats. Mirrors Quizlet's Learn mode: a word starts in multiple choice;
- * once answered right there it graduates to typed for its next appearance (mixed in among other
- * words' questions via the shared queue, not asked back-to-back); a miss at either stage demotes it
- * back to multiple choice and raises the streak required to master it.
- */
+/** Per-word progress within a single Learn session. */
 private class WordProgress(val word: WordEntity) {
     var streak = 0
     var needed = 1
@@ -52,10 +46,7 @@ private class WordProgress(val word: WordEntity) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LearnScreen(viewModel: AppViewModel, source: String, onBack: () -> Unit) {
-    // Freeze the word list for the whole session: recordAnswer() below updates each word's
-    // mastery stats in Room, which re-emits this Flow mid-session (and, for the "smart" weakest-
-    // words source, can reorder it). Reacting to that live would yank the user to a different
-    // word right after they answer. Take only the first emission and hold it steady.
+    // Freeze word list for the session; take the first emission.
     val wordsFlow = remember(source) { resolveWordSource(viewModel, source) }
     var sessionWords by remember(source) { mutableStateOf<List<WordEntity>?>(null) }
     LaunchedEffect(source) {
@@ -67,11 +58,7 @@ fun LearnScreen(viewModel: AppViewModel, source: String, onBack: () -> Unit) {
     val spanishFirst by viewModel.spanishFirst.collectAsState()
     val lists by viewModel.lists.collectAsState()
 
-    // A word leaves the queue once its streak of consecutive correct answers reaches `needed`.
-    // Getting a word wrong bumps its `needed` to 2, so it must then be answered right twice in a
-    // row (not just once) before it's considered learned for this session.
-    // At most BATCH_SIZE words are in play at once (`queue`); the rest wait in `pool` and are
-    // introduced one at a time as words graduate out, rather than starting every word at once.
+    // Words leave the queue after consecutive correct answers.
     var progressList by remember(source) { mutableStateOf<List<WordProgress>?>(null) }
     var queue by remember(source) { mutableStateOf<List<Int>>(emptyList()) }
     var pool by remember(source) { mutableStateOf<List<Int>>(emptyList()) }
@@ -131,9 +118,7 @@ fun LearnScreen(viewModel: AppViewModel, source: String, onBack: () -> Unit) {
         val word = wordProgress.word
         val format = wordProgress.stage
         val prompt = if (spanishFirst) word.spanish.first() else word.englishMeanings.first()
-        // A word can have several comma-separated accepted forms (englishMeanings, or the
-        // Spanish alternates the user entered). Multiple choice always tests against just the
-        // primary form, but a typed answer must give every form, in any order, to count as known.
+        // Multiple choice tests primary form; typed answer tests all forms.
         val requiredAnswers = if (spanishFirst) word.englishMeanings else word.spanish
         val expectedAnswer = requiredAnswers.joinToString(", ")
         val isExpectedSingle = { candidate: String -> requiredAnswers.first().equals(candidate, ignoreCase = true) }
@@ -203,7 +188,7 @@ fun LearnScreen(viewModel: AppViewModel, source: String, onBack: () -> Unit) {
                         OutlinedButton(
                             onClick = {
                                 val correct = isExpectedSingle(option)
-                                feedback = if (correct) "✓ Correct" else "✗ Correct answer: $expectedAnswer"
+                                feedback = if (correct) "Correct" else "Incorrect. Correct answer: $expectedAnswer"
                                 pendingCorrect = correct
                             },
                             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
@@ -219,7 +204,7 @@ fun LearnScreen(viewModel: AppViewModel, source: String, onBack: () -> Unit) {
                     Button(
                         onClick = {
                             val correct = isExpectedTyped(typedAnswer.trim())
-                            feedback = if (correct) "✓ Correct" else "✗ Correct answer: $expectedAnswer"
+                            feedback = if (correct) "Correct" else "Incorrect. Correct answer: $expectedAnswer"
                             pendingCorrect = correct
                         },
                         modifier = Modifier.padding(top = 12.dp),
@@ -235,11 +220,10 @@ fun LearnScreen(viewModel: AppViewModel, source: String, onBack: () -> Unit) {
                     color = if (pendingCorrect) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 12.dp)) {
-                    // Typed answers can be marked wrong by a typo or an acceptable answer the
-                    // dictionary doesn't list; let the user override rather than force a redo.
+                    // Allow manual override for valid alternate translations.
                     if (!pendingCorrect && format == QuizStage.TYPED) {
                         OutlinedButton(onClick = {
-                            feedback = "✓ Correct"
+                            feedback = "Correct"
                             pendingCorrect = true
                         }) { Text("I was right") }
                     }

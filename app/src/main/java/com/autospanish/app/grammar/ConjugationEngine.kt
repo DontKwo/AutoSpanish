@@ -10,31 +10,48 @@ object ConjugationEngine {
 
     private val REFLEXIVE_PRONOUNS = listOf("me ", "te ", "se ", "nos ", "os ", "se ")
 
-    fun conjugate(infinitive: String, dictionaries: AssetDictionaries): ConjugationResult {
+    fun conjugate(infinitive: String, dictionaries: AssetDictionaries): ConjugationResult =
+        conjugate(infinitive, dictionaries.irregularVerbs)
+
+    fun conjugate(infinitive: String, irregularVerbs: Map<String, IrregularVerbData>): ConjugationResult {
         val lower = infinitive.lowercase()
         val isReflexive = lower.endsWith("se") && lower.length > 3
+        val baseInfinitive = if (isReflexive) lower.dropLast(2) else lower
 
-        dictionaries.irregularVerbs[lower]?.let { data ->
-            val conjugations = mapOf(
-                "present" to data.present,
-                "preterite" to (data.preterite ?: emptyList()),
-                "imperfect" to (data.imperfect ?: emptyList()),
-                "future" to (data.future ?: emptyList()),
+        val irregularData = irregularVerbs[baseInfinitive] ?: irregularVerbs[lower]
+        if (irregularData != null) {
+            val rawConjugations = mapOf(
+                "present" to irregularData.present,
+                "preterite" to (irregularData.preterite ?: emptyList()),
+                "imperfect" to (irregularData.imperfect ?: emptyList()),
+                "future" to (irregularData.future ?: emptyList()),
             )
-            return ConjugationResult(isReflexive, data.type, conjugations)
+            val finalConjugations = if (isReflexive) {
+                rawConjugations.mapValues { (_, forms) ->
+                    forms.mapIndexed { i, form ->
+                        if (i < REFLEXIVE_PRONOUNS.size) REFLEXIVE_PRONOUNS[i] + form else form
+                    }
+                }
+            } else {
+                rawConjugations
+            }
+            return ConjugationResult(isReflexive, irregularData.type, finalConjugations)
         }
 
-        val baseInfinitive = if (isReflexive) infinitive.dropLast(2) else infinitive
         val regular = generateRegular(baseInfinitive)
         val finalConjugations = if (isReflexive) {
-            regular.mapValues { (_, forms) -> forms.mapIndexed { i, form -> REFLEXIVE_PRONOUNS[i] + form } }
+            regular.mapValues { (_, forms) ->
+                forms.mapIndexed { i, form ->
+                    if (i < REFLEXIVE_PRONOUNS.size) REFLEXIVE_PRONOUNS[i] + form else form
+                }
+            }
         } else {
             regular
         }
         return ConjugationResult(isReflexive, null, finalConjugations)
     }
 
-    private fun generateRegular(infinitive: String): Map<String, List<String>> {
+    internal fun generateRegular(infinitive: String): Map<String, List<String>> {
         if (infinitive.length < 3) return emptyMap()
         val stem = infinitive.dropLast(2)
         val ending = infinitive.takeLast(2)
@@ -57,12 +74,20 @@ object ConjugationEngine {
         }.map { stem + it }
 
         val future = listOf("é", "ás", "á", "emos", "éis", "án").map { infinitive + it }
+        val conditional = listOf("ía", "ías", "ía", "íamos", "íais", "ían").map { infinitive + it }
+
+        val subjunctivePresent = when (ending) {
+            "ar" -> listOf("e", "es", "e", "emos", "éis", "en")
+            else -> listOf("a", "as", "a", "amos", "áis", "an")
+        }.map { stem + it }
 
         return mapOf(
             "present" to present,
             "preterite" to preterite,
             "imperfect" to imperfect,
             "future" to future,
+            "conditional" to conditional,
+            "subjunctive_present" to subjunctivePresent,
         )
     }
 }

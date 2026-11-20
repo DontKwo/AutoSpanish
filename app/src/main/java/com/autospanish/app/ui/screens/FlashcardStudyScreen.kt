@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.autospanish.app.data.SortMode
+import com.autospanish.app.study.ReviewRating
 import com.autospanish.app.ui.AppViewModel
 import com.autospanish.app.ui.components.WordDetailMenu
 
@@ -129,6 +130,54 @@ fun FlashcardStudyScreen(viewModel: AppViewModel, source: String, onBack: () -> 
             Spacer(Modifier.height(12.dp))
             WordDetailMenu(word)
             Spacer(Modifier.height(8.dp))
+
+            if (flipped) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            viewModel.recordReview(word, ReviewRating.AGAIN)
+                            flipped = false
+                            index = (index + 1) % words.size
+                        },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text("Again")
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            viewModel.recordReview(word, ReviewRating.HARD)
+                            flipped = false
+                            index = (index + 1) % words.size
+                        },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text("Hard")
+                    }
+                    Button(
+                        onClick = {
+                            viewModel.recordReview(word, ReviewRating.GOOD)
+                            flipped = false
+                            index = (index + 1) % words.size
+                        },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text("Good")
+                    }
+                    Button(
+                        onClick = {
+                            viewModel.recordReview(word, ReviewRating.EASY)
+                            flipped = false
+                            index = (index + 1) % words.size
+                        },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text("Easy")
+                    }
+                }
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

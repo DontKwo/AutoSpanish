@@ -10,6 +10,7 @@ import com.autospanish.app.data.WordEntity
 import com.autospanish.app.data.WordListEntity
 import com.autospanish.app.export.BackupManager
 import com.autospanish.app.settings.SettingsDataStore
+import com.autospanish.app.study.ReviewRating
 import com.autospanish.app.translate.MlKitTranslateService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -45,6 +46,7 @@ class AppViewModel(
     fun wordsForList(listId: Long): Flow<List<WordEntity>> = repository.wordsForList(listId)
     fun searchWords(query: String): Flow<List<WordEntity>> = repository.search(query)
     fun weakestWords(limit: Int = 20): Flow<List<WordEntity>> = repository.weakestWords(limit)
+    fun dueWords(limit: Int = 30): Flow<List<WordEntity>> = repository.getDueWords(limit)
     fun wordCountForList(listId: Long): Flow<Int> = repository.wordCountForList(listId)
 
     suspend fun resolveDirection(rawInput: String): TranslationDirection? = repository.resolveDirection(rawInput)
@@ -113,6 +115,7 @@ class AppViewModel(
         viewModelScope.launch { repository.mergeListIntoList(sourceListId, targetListId) }
 
     fun recordAnswer(word: WordEntity, correct: Boolean) = viewModelScope.launch { repository.recordAnswer(word, correct) }
+    fun recordReview(word: WordEntity, rating: ReviewRating) = viewModelScope.launch { repository.recordReview(word, rating) }
 
     fun undo() {
         val action = _pendingUndo.value ?: return

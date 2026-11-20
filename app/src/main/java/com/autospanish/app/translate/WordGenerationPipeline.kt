@@ -75,11 +75,7 @@ class WordGenerationPipeline(
             return TranslationOutcome.Success(finishGeneration(raw, distinct, pos, professionEntry = null))
         }
 
-        // Multiple Spanish words can share an English gloss (e.g. "professor" also glosses
-        // "catedrático", "mother" also glosses "mai"). The less common word usually lists the
-        // common one as its own synonym (catedrático -> profesor, mai -> madre), so those collapse
-        // to one sense. Candidates with no such link (e.g. "orange" the fruit vs. the color) are
-        // genuinely different meanings — ask the user rather than silently guessing one.
+        // Collapse synonyms to one sense or query user for distinct senses.
         val dictMatches = dictionaries.dictionaryByEnglish[raw.lowercase()]
         if (!dictMatches.isNullOrEmpty()) {
             val resolution = SenseResolver.resolve(raw, dictMatches)
@@ -177,15 +173,7 @@ class WordGenerationPipeline(
         "amos", "emos", "imos", "aba", "ía", "ará", "erá", "irá",
     )
 
-    /**
-     * Returns the confidently-detected direction for a single word, or null when the word is
-     * genuinely ambiguous — either a valid entry in both the Spanish and English dictionaries at
-     * once (e.g. "red": English for the color, or Spanish for "net"), or unrecognized in either
-     * dictionary with no confident language signal. Callers should ask the user to disambiguate in
-     * that case rather than guess. Words missing from the dictionary (e.g. "why") aren't guessed by
-     * default — an on-device language identifier decides them, so "why" resolves to English on its
-     * own merits instead of via a blind fallback.
-     */
+    /** Returns detected translation direction, or null when ambiguous. */
     suspend fun resolveDirectionOrNull(rawInput: String): TranslationDirection? {
         val trimmed = rawInput.trim()
         if (trimmed.isEmpty() || trimmed.contains(" ")) return null
@@ -207,12 +195,7 @@ class WordGenerationPipeline(
     private suspend fun detectDirection(word: String): TranslationDirection =
         resolveDirectionOrNull(word) ?: TranslationDirection.EN_TO_ES
 
-    /**
-     * ML Kit's on-device model has no "I don't recognize this word" signal — it always emits
-     * something, and for input it can't translate that's usually just the input echoed back
-     * unchanged. MyMemory does the same for out-of-vocabulary queries. Treat an echoed result as
-     * a failed lookup so gibberish surfaces as "couldn't translate" instead of being added verbatim.
-     */
+    /** Checks whether candidate is an unchanged echo of input. */
     private fun isNoOpTranslation(input: String, candidate: String): Boolean =
         candidate.trim().equals(input.trim(), ignoreCase = true)
 

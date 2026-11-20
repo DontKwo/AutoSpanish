@@ -28,8 +28,7 @@ object MyMemoryClient {
             val response = api.translate(text, langPair)
             val meanings = mutableSetOf<String>()
             response.responseData?.translatedText?.let { meanings.add(it) }
-            // Quality "0" means MyMemory has no real match for the query and is just padding the
-            // response — don't treat that as a found translation.
+            // Quality 0 indicates no match.
             response.matches?.forEach { if (it.quality != "0") it.translation?.let { t -> meanings.add(t) } }
             meanings.map { it.trim() }.filter { it.isNotEmpty() }.take(5)
         } catch (e: Exception) {

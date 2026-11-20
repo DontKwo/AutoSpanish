@@ -87,7 +87,7 @@ fun SearchScreen(viewModel: AppViewModel, onBack: () -> Unit) {
                         OutlinedTextField(
                             value = query,
                             onValueChange = { query = it },
-                            placeholder = { Text("Search words…") },
+                            placeholder = { Text("Search words...") },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             trailingIcon = {

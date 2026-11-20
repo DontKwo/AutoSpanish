@@ -1,9 +1,13 @@
 package com.autospanish.app.data
 
+import com.autospanish.app.grammar.stripAccents
+import com.autospanish.app.study.ReviewRating
+import com.autospanish.app.study.SpacedRepetition
 import com.autospanish.app.translate.GeneratedWord
 import com.autospanish.app.translate.TranslationOutcome
 import com.autospanish.app.translate.WordGenerationPipeline
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 sealed class AddWordResult {
     data class Added(val word: WordEntity) : AddWordResult()
@@ -20,8 +24,24 @@ class Repository(
     val allLists: Flow<List<WordListEntity>> = listDao.getAllLists()
 
     fun wordsForList(listId: Long): Flow<List<WordEntity>> = wordDao.getWordsForList(listId)
-    fun search(query: String): Flow<List<WordEntity>> = wordDao.search(query)
+
+    fun search(query: String): Flow<List<WordEntity>> {
+        val trimmed = query.trim()
+        if (trimmed.isEmpty()) return kotlinx.coroutines.flow.flowOf(emptyList())
+        val normalizedQuery = stripAccents(trimmed.lowercase())
+        return wordDao.getAllWords().map { words ->
+            words.filter { word ->
+                word.spanish.any { stripAccents(it.lowercase()).contains(normalizedQuery) } ||
+                    word.englishMeanings.any { stripAccents(it.lowercase()).contains(normalizedQuery) }
+            }
+        }
+    }
+
     fun weakestWords(limit: Int = 20): Flow<List<WordEntity>> = wordDao.getWeakestWords(limit)
+
+    fun getDueWords(limit: Int = 30): Flow<List<WordEntity>> =
+        wordDao.getDueWords(System.currentTimeMillis(), limit)
+
     fun wordCountForList(listId: Long): Flow<Int> = wordDao.countForList(listId)
 
     suspend fun resolveDirection(rawInput: String): TranslationDirection? = pipeline.resolveDirectionOrNull(rawInput)
@@ -99,12 +119,13 @@ class Repository(
     }
 
     suspend fun recordAnswer(word: WordEntity, correct: Boolean) {
-        wordDao.update(
-            word.copy(
-                timesTried = word.timesTried + 1,
-                timesCorrect = word.timesCorrect + if (correct) 1 else 0,
-            )
-        )
+        val rating = if (correct) ReviewRating.GOOD else ReviewRating.AGAIN
+        recordReview(word, rating)
+    }
+
+    suspend fun recordReview(word: WordEntity, rating: ReviewRating) {
+        val updated = SpacedRepetition.applyReview(word, rating)
+        wordDao.update(updated)
     }
 
     suspend fun getWordIdsForList(listId: Long): List<Long> = wordDao.getWordIdsForListOnce(listId)

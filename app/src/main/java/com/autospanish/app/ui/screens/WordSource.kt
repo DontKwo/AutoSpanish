@@ -5,14 +5,19 @@ import com.autospanish.app.data.WordEntity
 import com.autospanish.app.data.WordListEntity
 import com.autospanish.app.ui.AppViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 
 fun resolveWordSource(viewModel: AppViewModel, source: String): Flow<List<WordEntity>> = when {
-    source == "smart" -> viewModel.weakestWords()
+    source == "due" -> viewModel.dueWords()
+    source == "smart" -> viewModel.dueWords().combine(viewModel.weakestWords()) { due, weakest ->
+        (due + weakest).distinctBy { it.id }
+    }
     source.startsWith("list_") -> viewModel.wordsForList(source.removePrefix("list_").toLong())
     else -> viewModel.wordsForList(source.toLongOrNull() ?: 1L)
 }
 
 fun sourceTitle(source: String, lists: List<WordListEntity>): String = when {
+    source == "due" -> "Due for Review"
     source == "smart" -> "Smart Review"
     source.startsWith("list_") -> {
         val id = source.removePrefix("list_").toLongOrNull()

@@ -11,18 +11,12 @@ fun stripToPrefix(gloss: String): String {
     return if (trimmed.startsWith("to ", ignoreCase = true)) trimmed.substring(3) else trimmed
 }
 
-/** Strips a trailing "?", "!", or "." — some glosses mark an interrogative/exclamatory sense that way. */
+/** Strips trailing question marks, exclamation marks, or periods. */
 private fun stripTrailingPunctuation(gloss: String): String = gloss.trim().trimEnd('?', '!', '.').trim()
 
 private val ALTERNATIVE_SEPARATOR = Regex("""\s+/\s+|\s+\bor\b\s+""")
 
-/**
- * Expands a dictionary gloss into every lowercase form a user's query might match: the gloss
- * itself, its infinitive stripped of a leading "to ", its trailing "?"/"!"/"." stripped, and —
- * for compound glosses like "grey / gray" or "to plunge or sink into" — each alternative
- * phrasing on its own, with the same stripping applied. Purely additive: it only adds extra
- * lookup keys pointing at the same entry.
- */
+/** Expands a dictionary gloss into lowercase forms for matching. */
 fun glossVariants(gloss: String): Set<String> {
     val trimmed = gloss.trim()
     val parts = trimmed.split(ALTERNATIVE_SEPARATOR).map { it.trim() }.filter { it.isNotEmpty() }
@@ -56,6 +50,16 @@ class AssetDictionaries private constructor(context: Context) {
         list.associateBy { it.spanish.lowercase() }
     }
 
+    /** Map of lowercase unaccented headwords to entries for accent-insensitive search. */
+    val dictionaryByUnaccentedSpanish: Map<String, DictionaryEntry> by lazy {
+        val list: List<DictionaryEntry> = load("dictionary.json", object : TypeToken<List<DictionaryEntry>>() {}.type)
+        val map = mutableMapOf<String, DictionaryEntry>()
+        for (entry in list) {
+            map.putIfAbsent(stripAccents(entry.spanish.lowercase()), entry)
+        }
+        map
+    }
+
     /** Feminine/masculine/plural inflected spellings the source only recorded as a field on the base entry. */
     private val dictionaryByInflectedForm: Map<String, DictionaryEntry> by lazy {
         val list: List<DictionaryEntry> = load("dictionary.json", object : TypeToken<List<DictionaryEntry>>() {}.type)
@@ -64,6 +68,18 @@ class AssetDictionaries private constructor(context: Context) {
             entry.feminineForm?.let { map.putIfAbsent(it.lowercase(), entry) }
             entry.masculineForm?.let { map.putIfAbsent(it.lowercase(), entry) }
             entry.pluralForm?.let { map.putIfAbsent(it.lowercase(), entry) }
+        }
+        map
+    }
+
+    /** Map of lowercase unaccented inflected forms to entries for accent-insensitive search. */
+    private val dictionaryByUnaccentedInflected: Map<String, DictionaryEntry> by lazy {
+        val list: List<DictionaryEntry> = load("dictionary.json", object : TypeToken<List<DictionaryEntry>>() {}.type)
+        val map = mutableMapOf<String, DictionaryEntry>()
+        for (entry in list) {
+            entry.feminineForm?.let { map.putIfAbsent(stripAccents(it.lowercase()), entry) }
+            entry.masculineForm?.let { map.putIfAbsent(stripAccents(it.lowercase()), entry) }
+            entry.pluralForm?.let { map.putIfAbsent(stripAccents(it.lowercase()), entry) }
         }
         map
     }
@@ -84,6 +100,15 @@ class AssetDictionaries private constructor(context: Context) {
             val singular = lower.dropLast(1)
             dictionaryBySpanish[singular]?.let { return it }
             dictionaryByInflectedForm[singular]?.let { return it }
+        }
+        val unaccented = stripAccents(lower)
+        dictionaryByUnaccentedSpanish[unaccented]?.let { return it }
+        dictionaryByUnaccentedInflected[unaccented]?.let { return it }
+        stripReflexiveSuffix(unaccented)?.let { base -> dictionaryByUnaccentedSpanish[base]?.let { return it } }
+        if (unaccented.endsWith("s")) {
+            val singular = unaccented.dropLast(1)
+            dictionaryByUnaccentedSpanish[singular]?.let { return it }
+            dictionaryByUnaccentedInflected[singular]?.let { return it }
         }
         return null
     }

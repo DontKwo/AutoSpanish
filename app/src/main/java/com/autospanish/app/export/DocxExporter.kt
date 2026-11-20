@@ -39,7 +39,7 @@ object DocxExporter {
         builder.append("""<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>""")
         builder.append(paragraph(title, bold = true))
         for (word in words) {
-            val line = "${word.spanish.joinToString(", ")} — ${word.englishMeanings.joinToString("; ")}"
+            val line = "${word.spanish.joinToString(", ")}: ${word.englishMeanings.joinToString("; ")}"
             builder.append(paragraph(line))
         }
         builder.append("</w:body></w:document>")

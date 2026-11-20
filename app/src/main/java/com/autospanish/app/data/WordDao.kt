@@ -22,8 +22,7 @@ interface WordDao {
     @Query("SELECT * FROM words WHERE id = :id")
     suspend fun getById(id: Long): WordEntity?
 
-    /** Matches if any of [forms] equals any of the stored Spanish forms — spanish is now a
-     * comma-editable list, so exact-string SQL matching against its JSON encoding won't do. */
+    /** Matches when any candidate form equals a stored Spanish form. */
     suspend fun findByAnySpanishForm(forms: List<String>): WordEntity? =
         getAllWordsOnce().firstOrNull { entity -> entity.spanish.any { s -> forms.any { it.equals(s, ignoreCase = true) } } }
 
@@ -52,6 +51,9 @@ interface WordDao {
 
     @Query("SELECT * FROM words WHERE timesTried > 0 ORDER BY (CAST(timesCorrect AS FLOAT) / timesTried) ASC LIMIT :limit")
     fun getWeakestWords(limit: Int): Flow<List<WordEntity>>
+
+    @Query("SELECT * FROM words WHERE timesTried > 0 AND nextReviewDate > 0 AND nextReviewDate <= :currentTime ORDER BY nextReviewDate ASC LIMIT :limit")
+    fun getDueWords(currentTime: Long, limit: Int = 30): Flow<List<WordEntity>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertListCrossRef(ref: ListWordCrossRef)

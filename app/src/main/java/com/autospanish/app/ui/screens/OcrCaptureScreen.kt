@@ -149,7 +149,7 @@ fun OcrCaptureScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                     Text(
-                        "Reading text…",
+                        "Reading text...",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(start = 10.dp),
                     )

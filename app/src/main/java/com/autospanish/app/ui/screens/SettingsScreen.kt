@@ -80,12 +80,12 @@ fun SettingsScreen(viewModel: AppViewModel, onBack: () -> Unit, onOpenBackup: ()
                         downloading = true
                         viewModel.downloadOfflineModels { success ->
                             downloading = false
-                            Toast.makeText(context, if (success) "Models downloaded" else "Download failed — check connection", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, if (success) "Models downloaded" else "Download failed: check connection", Toast.LENGTH_SHORT).show()
                         }
                     },
                     enabled = !downloading,
                     modifier = Modifier.padding(top = 10.dp).fillMaxWidth(),
-                ) { Text(if (downloading) "Downloading…" else "Download offline models") }
+                ) { Text(if (downloading) "Downloading..." else "Download offline models") }
             }
 
             SettingsSection(title = "Data", icon = Icons.Filled.Save) {

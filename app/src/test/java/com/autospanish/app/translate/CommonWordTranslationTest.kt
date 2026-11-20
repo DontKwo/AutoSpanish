@@ -11,12 +11,7 @@ import org.junit.Test
  * Google Translate) would give by default. Each test collects every mismatch before failing, so
  * one run shows the full picture instead of stopping at the first bad word.
  *
- * Where more than one Spanish/English word is an equally standard translation (regional variants,
- * gender forms, near-synonyms the resolver legitimately lands on), every accepted alternative is
- * listed — this is not a weakening of the check: any answer in the list is one a fluent speaker
- * would accept. A handful of multi-word English phrases with no single-word Spanish equivalent in
- * this dictionary (e.g. "nowhere") are intentionally absent; that's a dictionary content boundary,
- * not a resolver bug.
+ * Covers common translation variations and synonyms.
  */
 class CommonWordTranslationTest {
 

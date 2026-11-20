@@ -31,7 +31,7 @@ object PdfExporter {
                 canvas = page.canvas
                 y = MARGIN
             }
-            val line = "${word.spanish.joinToString(", ")}  —  ${word.englishMeanings.joinToString("; ")}"
+            val line = "${word.spanish.joinToString(", ")}: ${word.englishMeanings.joinToString("; ")}"
             canvas.drawText(line, MARGIN, y, bodyPaint)
             y += LINE_HEIGHT
         }

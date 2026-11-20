@@ -3,11 +3,7 @@ package com.autospanish.app.translate
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Confirms genuinely ambiguous English words (multiple unrelated Spanish senses) auto-resolve to
- * one entry rather than surfacing a picker — the user has no way to know which sense is meant, so
- * [SenseResolver] picks the most common word and keeps the other sense(s) as synonyms instead.
- */
+/** Tests that ambiguous words resolve to one sense and keep others as synonyms. */
 class AmbiguousWordTest {
 
     @Test

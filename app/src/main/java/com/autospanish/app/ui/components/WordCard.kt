@@ -141,12 +141,14 @@ internal fun infoMenuItems(word: WordEntity, onPick: (WordInfoKind) -> Unit) {
 @Composable
 internal fun WordFlagsAndInfoPanel(word: WordEntity, expandedInfo: WordInfoKind?, onDismissInfo: () -> Unit) {
     val autoFlags = buildAutoFlags(word)
-    if (autoFlags.isNotEmpty() || word.timesTried > 0) {
+    if (autoFlags.isNotEmpty() || word.timesTried > 0 || word.isDueForReview || word.isLeech) {
         Row(
             modifier = Modifier.padding(top = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             if (word.timesTried > 0) MasteryChip(word.masteryPercent)
+            if (word.isDueForReview) FlagChip("Review due", false)
+            if (word.isLeech) FlagChip("Needs practice", true)
             autoFlags.forEach { flag -> FlagChip(flag.first, flag.second) }
         }
     }

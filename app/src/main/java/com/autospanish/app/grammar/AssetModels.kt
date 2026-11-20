@@ -15,7 +15,7 @@ data class DictionaryEntry(
     /** Sourced conjugation table keyed by tense/mood (e.g. "present", "subjunctive_imperfect", "imperative"),
      * each value an ordered list of person forms; null to fall back to [ConjugationEngine]'s rule-based generation. */
     val conjugationTable: Map<String, List<String>>? = null,
-    /** Real usage examples from the source dictionary, each optionally suffixed with " — <translation>". */
+    /** Real usage examples from the source dictionary, each optionally suffixed with ": <translation>". */
     val exampleSentences: List<String>? = null,
     val synonyms: List<String>? = null,
     val antonyms: List<String>? = null,

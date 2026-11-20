@@ -6,15 +6,7 @@ import com.autospanish.app.grammar.glossVariants
 
 data class SenseResolution(val entry: DictionaryEntry, val extraSynonyms: List<String>)
 
-/**
- * Picks which Spanish dictionary entry best matches an English query when more than one entry
- * glosses that word. Entries transitively linked by an explicit synonym reference (either
- * direction, chained through any number of intermediate entries) are the same sense and collapse
- * to the best one. Entries that remain unlinked are genuinely different meanings (e.g. "orange"
- * the fruit vs. "orange" the color) — rather than asking the user to pick (they have no way to
- * know), the most common Spanish word wins, like a machine translator would, and the other
- * senses' words are kept as synonyms on the resolved entry.
- */
+/** Picks the Spanish dictionary entry that best matches an English query. */
 object SenseResolver {
     fun resolve(raw: String, candidates: List<DictionaryEntry>): SenseResolution {
         val rawLower = raw.lowercase()
@@ -54,12 +46,7 @@ object SenseResolver {
         entry.synonyms?.any { it.equals(other.spanish, ignoreCase = true) } == true
 
     private fun bestOf(cluster: List<DictionaryEntry>, rawLower: String): DictionaryEntry = cluster.sortedWith(
-        // Real-world frequency is the strongest signal of "most common word" — stronger than any
-        // heuristic derivable from the scraped data itself — so a known-common Spanish word wins
-        // over a rarer synonym even if the rarer one happens to list its gloss first or has more
-        // metadata recorded. Beneath that, a word's first-listed gloss matching is the next best
-        // signal that the query is its primary sense (scraped gloss order isn't fully reliable, so
-        // "matches some gloss" is kept as a weaker fallback tiebreak beneath it).
+        // Rank by frequency first, then first-listed gloss match.
         compareByDescending<DictionaryEntry> { it.spanish.lowercase() in COMMON_SPANISH_WORDS }
             .thenByDescending { candidate ->
                 candidate.english.firstOrNull()?.let { rawLower in glossVariants(it) } == true
