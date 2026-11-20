@@ -81,11 +81,11 @@ class SpacedRepetitionTest {
     @Test
     fun `due for review is true when nextReviewDate is in the past`() {
         val word = testWord()
-        val now = 2_000_000_000L
+        val now = System.currentTimeMillis()
         val reviewed = SpacedRepetition.applyReview(word, ReviewRating.GOOD, now)
 
         assertFalse(reviewed.isDueForReview)
-        val pastDue = reviewed.copy(nextReviewDate = System.currentTimeMillis() - 1000L)
+        val pastDue = reviewed.copy(nextReviewDate = now - 1000L)
         assertTrue(pastDue.isDueForReview)
     }
 }
