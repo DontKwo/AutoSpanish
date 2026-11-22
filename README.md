@@ -1,14 +1,24 @@
 # AutoSpanish
 
+[![CI/CD](https://github.com/DontKwo/AutoSpanish/actions/workflows/ci.yml/badge.svg)](https://github.com/DontKwo/AutoSpanish/actions/workflows/ci.yml)
+[![Download Android APK](https://img.shields.io/badge/Download-Android_APK-success?logo=android&logoColor=white)](https://github.com/DontKwo/AutoSpanish/releases/download/latest/AutoSpanish.apk)
+[![Latest Release](https://img.shields.io/badge/Release-Latest_Build-blue)](https://github.com/DontKwo/AutoSpanish/releases/latest)
+
 Welcome to AutoSpanish! This Android app turns a word, phrase, or sentence (Spanish or English) into a fully-annotated flashcard: correct article and gender for nouns, masculine/feminine forms for adjectives and professions, verb conjugations with irregularity flags, false-friend warnings, and more. Organized into reusable lists, each of which can be studied directly with flip cards or Quizlet-style Learn mode: there's no separate "flashcard set" concept to manage.
 
 See `docs/USER_GUIDE.md` for full usage instructions and feature details.
 
-A pre-built debug APK is already included at the project root: `app-debug.apk`.
+## Download & Install
+
+Every push to `main` runs the test suite, runs the strict linter, and publishes an updated Android APK to [GitHub Releases](https://github.com/DontKwo/AutoSpanish/releases/latest):
+
+- **Direct APK Download**: [AutoSpanish.apk](https://github.com/DontKwo/AutoSpanish/releases/download/latest/AutoSpanish.apk) ([app-debug.apk](https://github.com/DontKwo/AutoSpanish/releases/download/latest/app-debug.apk))
+- **Checksums**: [SHA256SUMS.txt](https://github.com/DontKwo/AutoSpanish/releases/download/latest/SHA256SUMS.txt)
+- **All Releases**: [GitHub Releases Page](https://github.com/DontKwo/AutoSpanish/releases)
 
 ## Quick Start
 
-1. **Install the App**: Install the `app-debug.apk` included in the root directory on your Android device (or emulator).
+1. **Install the App**: Download `AutoSpanish.apk` (or `app-debug.apk`) from the [Latest GitHub Release](https://github.com/DontKwo/AutoSpanish/releases/latest) and install it on your Android device or emulator.
 2. **Translate and Learn**: Open the app and begin typing or scanning words/phrases to translate. AutoSpanish will automatically generate rich, grammar-annotated flashcards.
 3. **Study Lists**: Your generated words are saved to lists. Navigate to any list and start a study session immediately!
 4. **Documentation**: Check out the comprehensive documentation for more information:

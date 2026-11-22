@@ -11,6 +11,9 @@ on:
       - master
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   lint:
     name: ClaudeMD Linter
@@ -33,7 +36,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v5
 
       - name: Run ClaudeMD Strict Linter
         run: uv run --no-project python .toolchain/ai-dev-tools/scripts/claudemd_linter.py . --level strict --full --skip 46,47
@@ -45,6 +48,7 @@ jobs:
 
   test-and-build:
     name: Test and Build APK
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -68,13 +72,40 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
 
+      - name: Stage APK for release
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk AutoSpanish.apk
+          cp app/build/outputs/apk/debug/app-debug.apk app-debug.apk
+          sha256sum AutoSpanish.apk app-debug.apk > SHA256SUMS.txt
+
       - name: Upload Debug APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: AutoSpanish-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: AutoSpanish.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish latest APK release
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          target_commitish: ${{ github.sha }}
+          name: "Latest Build (Android APK)"
+          body: |
+            Automated Android APK build generated on push to `main` (${{ github.sha }}).
+
+            ### Direct Download
+            Download and install directly on your Android device:
+            - **[AutoSpanish.apk](https://github.com/${{ github.repository }}/releases/download/latest/AutoSpanish.apk)**
+            - **[app-debug.apk](https://github.com/${{ github.repository }}/releases/download/latest/app-debug.apk)**
+          prerelease: false
+          make_latest: true
+          files: |
+            AutoSpanish.apk
+            app-debug.apk
+            SHA256SUMS.txt
 
       - name: Upload Test Reports on Failure
         if: failure()
