@@ -1,116 +1,236 @@
-name: CI/CD
+name: CI & Release
 
 on:
   push:
     branches:
       - main
-      - master
   pull_request:
     branches:
       - main
-      - master
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  lint:
-    name: ClaudeMD Linter
+  lint-and-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout AutoSpanish
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
 
-      - name: Checkout ai-dev-tools for linter
-        uses: actions/checkout@v4
-        with:
-          repository: DontKwo/ai-dev-tools
-          path: .toolchain/ai-dev-tools
-
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install uv
+      - name: Setup uv
         uses: astral-sh/setup-uv@v5
 
-      - name: Run ClaudeMD Strict Linter
-        run: uv run --no-project python .toolchain/ai-dev-tools/scripts/claudemd_linter.py . --level strict --full --skip 46,47
+      - name: Clone ai-dev-tools
+        shell: bash
+        run: git clone --depth 1 https://github.com/DontKwo/ai-dev-tools.git "${{ runner.temp }}/_aitools"
 
-      - name: Display Lint Report on Failure
-        if: failure()
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Run Strict Linter and Link Check
+        shell: bash
         run: |
-          find .toolchain/ai-dev-tools/scripts/ -name "lint_report_*.txt" -exec cat {} + || true
+          if ! uv run --no-project python "${{ runner.temp }}/_aitools/scripts/claudemd_linter.py" . --level strict --full --no-cache; then
+            cat "${{ runner.temp }}/_aitools/scripts"/lint_report_*.txt || true
+            exit 1
+          fi
+          uv run --no-project python "${{ runner.temp }}/_aitools/scripts/link_checker.py" .
 
-  test-and-build:
-    name: Test and Build APK
-    needs: lint
+      - name: Setup Gradle and Run Unit Tests
+        run: |
+          chmod +x ./gradlew
+          ./gradlew test --console=plain
+
+      - name: Compute Next SemVer Release Version
+        id: ver
+        shell: python
+        run: |
+          import os, re, subprocess
+          subprocess.run(["git", "fetch", "--tags", "--force"], check=False)
+          raw_tags = subprocess.check_output(["git", "tag", "--list", "v*"], text=True).splitlines()
+          semvers = []
+          for t in raw_tags:
+              m = re.match(r"^v?(\d+)\.(\d+)\.(\d+)$", t.strip())
+              if m:
+                  semvers.append(tuple(int(x) for x in m.groups()))
+          base = max(semvers) if semvers else (0, 1, 0)
+          next_ver = (base[0], base[1], base[2] + 1) if f"v{base[0]}.{base[1]}.{base[2]}" in raw_tags else base
+          ver_str = f"{next_ver[0]}.{next_ver[1]}.{next_ver[2]}"
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+              f.write(f"version={ver_str}\ntag=v{ver_str}\n")
+          print(f"Resolved version v{ver_str}")
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+      tag: ${{ steps.ver.outputs.tag }}
+
+  build-android:
+    needs: lint-and-test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: "temurin"
+          java-version: "17"
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Run unit tests
-        run: ./gradlew test --stacktrace
-
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
-
-      - name: Stage APK for release
+      - name: Bump Version Code and Name
+        shell: python
         run: |
-          cp app/build/outputs/apk/debug/app-debug.apk AutoSpanish.apk
-          cp app/build/outputs/apk/debug/app-debug.apk app-debug.apk
-          sha256sum AutoSpanish.apk app-debug.apk > SHA256SUMS.txt
+          from pathlib import Path
+          import re
+          ver = "${{ needs.lint-and-test.outputs.version }}"
+          parts = [int(x) for x in ver.split(".")]
+          code = parts[0] * 10000 + parts[1] * 100 + parts[2]
+          gf = Path("app/build.gradle.kts")
+          txt = gf.read_text(encoding="utf-8")
+          txt = re.sub(r"versionCode\s*=\s*\d+", f"versionCode = {code}", txt)
+          txt = re.sub(r'versionName\s*=\s*"[^"]*"', f'versionName = "{ver}"', txt)
+          gf.write_text(txt, encoding="utf-8")
 
-      - name: Upload Debug APK artifact
+      - name: Build Signed Release APK and Verify Certificate
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "Missing ANDROID_KEYSTORE_BASE64 secret" >&2
+            exit 1
+          fi
+          KEYSTORE_TMP="$(mktemp /tmp/autospanish-ks-XXXXXX.jks)"
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$KEYSTORE_TMP"
+          export ANDROID_KEYSTORE_PATH="$KEYSTORE_TMP"
+          chmod +x ./gradlew
+          ./gradlew assembleRelease --console=plain
+          rm -f "$KEYSTORE_TMP"
+          APK_PATH="app/build/outputs/apk/release/app-release.apk"
+          CERT_INFO=$(keytool -printcert -jarfile "$APK_PATH")
+          echo "$CERT_INFO"
+          if echo "$CERT_INFO" | grep -q "CN=Android Debug"; then
+            echo "ERROR: APK is signed with debug certificate" >&2
+            exit 1
+          fi
+          if ! echo "$CERT_INFO" | grep -q "CN=AutoSpanish"; then
+            echo "ERROR: APK missing CN=AutoSpanish certificate" >&2
+            exit 1
+          fi
+          mkdir -p release-assets
+          cp "$APK_PATH" release-assets/AutoSpanish-Android.apk
+
+      - name: Upload Android APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AutoSpanish-debug-apk
-          path: AutoSpanish.apk
-          if-no-files-found: error
-          retention-days: 30
+          name: android-package
+          path: release-assets/AutoSpanish-Android.apk
 
-      - name: Publish latest APK release
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+  release:
+    needs: [lint-and-test, build-android]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Release Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: latest
-          target_commitish: ${{ github.sha }}
-          name: "Latest Build (Android APK)"
-          body: |
-            Automated Android APK build generated on push to `main` (${{ github.sha }}).
-
-            ### Direct Download
-            Download and install directly on your Android device:
-            - **[AutoSpanish.apk](https://github.com/${{ github.repository }}/releases/download/latest/AutoSpanish.apk)**
-            - **[app-debug.apk](https://github.com/${{ github.repository }}/releases/download/latest/app-debug.apk)**
+          tag_name: ${{ needs.lint-and-test.outputs.tag }}
+          name: AutoSpanish ${{ needs.lint-and-test.outputs.tag }}
           prerelease: false
-          make_latest: true
+          make_latest: "true"
+          generate_release_notes: true
           files: |
-            AutoSpanish.apk
-            app-debug.apk
-            SHA256SUMS.txt
+            artifacts/android-package/AutoSpanish-Android.apk
 
-      - name: Upload Test Reports on Failure
-        if: failure()
+  capture-screenshots:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Build Debug APK for Screenshots
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --console=plain
+
+      - name: Capture Real Android Emulator Screenshots
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio
+          script: |
+            set -e
+            mkdir -p captured-screenshots
+            adb install -r app/build/outputs/apk/debug/app-debug.apk
+            adb shell am start -n com.autospanish.app/.MainActivity
+            sleep 5
+            adb exec-out screencap -p > captured-screenshots/01_main.png
+            python3 - << 'EOF'
+            import re, subprocess, time, xml.etree.ElementTree as ET
+            def dump_nodes():
+                subprocess.run(["adb", "shell", "uiautomator", "dump", "/sdcard/ui.xml"], check=True)
+                xml_data = subprocess.check_output(["adb", "exec-out", "cat", "/sdcard/ui.xml"], text=True)
+                return ET.fromstring(xml_data)
+            def tap_match(root, targets):
+                for node in root.iter("node"):
+                    label = (node.attrib.get("text", "") + " " + node.attrib.get("content-desc", "")).strip()
+                    if any(t.lower() in label.lower() for t in targets):
+                        m = re.findall(r"\d+", node.attrib.get("bounds", ""))
+                        if len(m) == 4:
+                            cx = (int(m[0]) + int(m[2])) // 2
+                            cy = (int(m[1]) + int(m[3])) // 2
+                            subprocess.run(["adb", "shell", "input", "tap", str(cx), str(cy)], check=True)
+                            return True
+                return False
+            root = dump_nodes()
+            if tap_match(root, ["Add word"]):
+                time.sleep(2)
+                with open("captured-screenshots/02_add_word.png", "wb") as f:
+                    f.write(subprocess.check_output(["adb", "exec-out", "screencap", "-p"]))
+                root2 = dump_nodes()
+                if tap_match(root2, ["Cancel", "Navigate up", "Back"]):
+                    time.sleep(1)
+                else:
+                    subprocess.run(["adb", "shell", "input", "keyevent", "4"], check=False)
+                    time.sleep(1)
+            root3 = dump_nodes()
+            if tap_match(root3, ["All Words"]):
+                time.sleep(2)
+                with open("captured-screenshots/03_list.png", "wb") as f:
+                    f.write(subprocess.check_output(["adb", "exec-out", "screencap", "-p"]))
+            EOF
+
+      - name: Upload Emulator Screenshots
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports
-          path: app/build/reports/tests/
-          retention-days: 7
+          name: emulator-screenshots
+          path: captured-screenshots/*.png

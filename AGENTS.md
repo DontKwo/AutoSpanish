@@ -19,7 +19,18 @@
 
 As this is a standard Android application, it lacks traditional Command Line Interface (CLI) entry points for its core features.
 
-The primary command line usage is for building, testing, and installing the application via the Gradle wrapper (`gradlew`):
-*   `./gradlew assembleDebug`: Builds the debug APK.
-*   `./gradlew test`: Runs the test suite.
-*   `./build-apk.sh`: Helper script to build the debug APK and copy it to the root directory using the project-local toolchain.
+The primary command line usage is for building and testing through the Gradle wrapper (`gradlew`):
+* `./gradlew test`: Runs the JUnit test suite.
+* `./gradlew assembleRelease`: Builds the release APK when keystore environment variables are configured.
+
+## Documentation & Linting Rules
+
+* Keep `README.md` user-focused (`<= 120` lines), avoid checksums or CI prose, and keep [Android APK Installation Guide](docs/APK_INSTALLATION.md) linked prominently.
+* Keep `## Related Documentation` footers linking back to `../README.md` on all files under `docs/`.
+
+## Related Documentation
+
+* [Project Overview](README.md)
+* [Developer Guide](docs/DEVELOPMENT.md)
+* [User Guide](docs/USER_GUIDE.md)
+* [Security Policy](SECURITY.md)

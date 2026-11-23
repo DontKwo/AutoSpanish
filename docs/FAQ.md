@@ -22,3 +22,11 @@ If a specific verb's table is not present in the dictionary, the app dynamically
 A: No, AutoSpanish does not support importing standard flashcard "decks." The app is designed around generating words individually from dictionary data to provide rich grammatical context, rather than importing simple front/back cards.
 
 However, you *can* backup and restore your entire AutoSpanish database (lists and words) as a single JSON payload using the Backup feature (managed by `BackupManager.kt`).
+
+## Related Documentation
+
+- [Project Overview](../README.md)
+- [User Guide](USER_GUIDE.md)
+- [Android APK Installation Guide](APK_INSTALLATION.md)
+- [Developer Guide](DEVELOPMENT.md)
+- [Security Policy](../SECURITY.md)

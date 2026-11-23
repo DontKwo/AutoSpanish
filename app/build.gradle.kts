@@ -16,8 +16,24 @@ android {
         versionName = "1.0"
     }
 
+    signingConfigs {
+        create("release") {
+            val ksPath = System.getenv("ANDROID_KEYSTORE_PATH")
+            if (!ksPath.isNullOrBlank()) {
+                storeFile = file(ksPath)
+                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: ""
+                keyAlias = System.getenv("ANDROID_KEY_ALIAS") ?: ""
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD") ?: ""
+            }
+        }
+    }
+
     buildTypes {
         release {
+            val relSign = signingConfigs.findByName("release")
+            if (relSign?.storeFile?.exists() == true) {
+                signingConfig = relSign
+            }
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
@@ -47,14 +63,7 @@ android {
     }
 }
 
-tasks.matching { it.name == "assembleDebug" }.configureEach {
-    doLast {
-        val apk = layout.buildDirectory.file("outputs/apk/debug/app-debug.apk").get().asFile
-        if (apk.exists()) {
-            apk.copyTo(rootProject.file("app-debug.apk"), overwrite = true)
-        }
-    }
-}
+
 
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")

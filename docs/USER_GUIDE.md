@@ -1,41 +1,34 @@
 # AutoSpanish User Guide
 
-Welcome to the AutoSpanish User Guide! This document will walk you through the core features of the app and help you start learning effectively.
+Learn how to generate grammar-annotated flashcards, scan Spanish text, study lists, and export your vocabulary in AutoSpanish.
 
-## Vocabulary Generation
+## Installing on Android
 
-AutoSpanish creates flashcards for you as you encounter new words.
+Download `AutoSpanish-Android.apk` from [Latest Releases](https://github.com/DontKwo/AutoSpanish/releases/latest) and follow the [Android APK Installation Guide](APK_INSTALLATION.md).
 
-### Translating Text
-1. Navigate to the **Home** or **Search** screen.
-2. Type in a word or phrase in either English or Spanish.
-3. The app's `WordGenerationPipeline` will automatically resolve the language, lookup the word, and generate a fully-annotated flashcard containing gender, plural forms, example sentences, conjugations, and more.
-4. Save the generated word to a specific list.
+## Vocabulary Generation & Offline Dictionary
 
-### Scanning Text (OCR)
-1. Tap the **Camera** icon to open the OCR feature.
-2. Point your device's camera at text containing the word you want to learn.
-3. The app will recognize the text, and you can select the word to immediately translate and save it as a flashcard.
+1. Open **Home** or **Search** and type an English or Spanish word or phrase.
+2. `AutoSpanish` checks its bundled offline Spanish dictionary (~78,900 headwords extracted from Kaikki/Wiktionary alongside curated irregular verbs, false-friend warnings, `ser`/`estar` shifts, prepositions, and regional variants) first.
+3. Each generated flashcard includes noun gender and articles (`el`/`la`), plural forms, gendered pairs, conjugated verb tables, example sentences, synonyms, and false-friend warnings.
+4. For words outside the bundled dictionary, the app falls back to on-device Google ML Kit (downloadable in in-app **Settings** for offline use) or the MyMemory online API when connected.
 
-## Study Sessions
+## Scanning Text (OCR)
 
-AutoSpanish makes reviewing vocabulary simple. There's no separate "deck" concept; you study directly from the lists you build.
+1. Tap **Camera / Scan** and grant camera permission when prompted.
+2. Frame printed Spanish or English text and tap any detected word to translate and save it into a list.
 
-1. Navigate to your desired word list.
-2. Select either **Flashcards** or **Learn Mode**.
-    *   **Flashcards:** Traditional flip-cards for a quick review.
-    *   **Learn Mode:** A Quizlet-style mode to test your knowledge more rigorously.
+## Study Modes & Exporting Lists
 
-## Exporting Lists
+- **Flashcards**: Classic two-sided flip cards for rapid recall.
+- **Learn Mode**: Interactive multi-format drill mode organized directly around your word lists.
+- **Export & Backup**: Export any list as CSV, Quizlet text, printable PDF, or DOCX, or export/restore a full JSON backup under **Settings**.
 
-You can export your lists in several formats so you can review them or share them however you like:
+## Related Documentation
 
-1. Go to a specific list.
-2. Tap the Export option.
-3. Choose one of the following formats:
-    *   **CSV:** Standard comma-separated values format for spreadsheets.
-    *   **Quizlet:** Text formatted for easy import into Quizlet.
-    *   **PDF:** A printable document of your vocabulary list.
-    *   **DOCX:** A Microsoft Word document.
-
-*(Export functionality is handled via the specific exporters found in the `com.autospanish.app.export` package.)*
+- [Project Overview](../README.md)
+- [Android APK Installation Guide](APK_INSTALLATION.md)
+- [Frequently Asked Questions](FAQ.md)
+- [Developer Guide](DEVELOPMENT.md)
+- [Third-Party Notices & Data Provenance](../THIRD_PARTY_NOTICES.md)
+- [Security Policy](../SECURITY.md)

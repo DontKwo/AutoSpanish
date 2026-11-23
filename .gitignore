@@ -15,4 +15,9 @@ app/build/
 # Secrets and environment files
 .env
 .env.*
+*.keystore
+*.jks
+lint_report*.txt
+scripts/lint_report*.txt
+.lint_cache.json
 

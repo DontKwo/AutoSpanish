@@ -1,111 +1,72 @@
+<p align="center">
+  <img src="assets/logo.png" alt="AutoSpanish Logo" width="240" />
+</p>
+
 # AutoSpanish
 
-[![CI/CD](https://github.com/DontKwo/AutoSpanish/actions/workflows/ci.yml/badge.svg)](https://github.com/DontKwo/AutoSpanish/actions/workflows/ci.yml)
-[![Download Android APK](https://img.shields.io/badge/Download-Android_APK-success?logo=android&logoColor=white)](https://github.com/DontKwo/AutoSpanish/releases/download/latest/AutoSpanish.apk)
-[![Latest Release](https://img.shields.io/badge/Release-Latest_Build-blue)](https://github.com/DontKwo/AutoSpanish/releases/latest)
+**Turn any Spanish or English word into a grammar-annotated flashcard on Android, complete with offline dictionary entries, verb conjugations, and study modes.**
 
-Welcome to AutoSpanish! This Android app turns a word, phrase, or sentence (Spanish or English) into a fully-annotated flashcard: correct article and gender for nouns, masculine/feminine forms for adjectives and professions, verb conjugations with irregularity flags, false-friend warnings, and more. Organized into reusable lists, each of which can be studied directly with flip cards or Quizlet-style Learn mode: there's no separate "flashcard set" concept to manage.
+AutoSpanish ships with ~78,900 Wiktionary-derived Spanish headwords covering noun gender, plural forms, adjective pairs, full conjugation tables, and false-friend warnings, paired with flashcards and Learn mode quizzes.
 
-See `docs/USER_GUIDE.md` for full usage instructions and feature details.
+---
 
-## Download & Install
+## Download
 
-Every push to `main` runs the test suite, runs the strict linter, and publishes an updated Android APK to [GitHub Releases](https://github.com/DontKwo/AutoSpanish/releases/latest):
+| Platform | Download | Setup Guide |
+| :--- | :--- | :--- |
+| Android | [AutoSpanish-Android.apk](https://github.com/DontKwo/AutoSpanish/releases/latest/download/AutoSpanish-Android.apk) | [Android APK Install Guide](docs/APK_INSTALLATION.md) |
 
-- **Direct APK Download**: [AutoSpanish.apk](https://github.com/DontKwo/AutoSpanish/releases/download/latest/AutoSpanish.apk) ([app-debug.apk](https://github.com/DontKwo/AutoSpanish/releases/download/latest/app-debug.apk))
-- **Checksums**: [SHA256SUMS.txt](https://github.com/DontKwo/AutoSpanish/releases/download/latest/SHA256SUMS.txt)
-- **All Releases**: [GitHub Releases Page](https://github.com/DontKwo/AutoSpanish/releases)
+---
 
-## Quick Start
+## Screenshots
 
-1. **Install the App**: Download `AutoSpanish.apk` (or `app-debug.apk`) from the [Latest GitHub Release](https://github.com/DontKwo/AutoSpanish/releases/latest) and install it on your Android device or emulator.
-2. **Translate and Learn**: Open the app and begin typing or scanning words/phrases to translate. AutoSpanish will automatically generate rich, grammar-annotated flashcards.
-3. **Study Lists**: Your generated words are saved to lists. Navigate to any list and start a study session immediately!
-4. **Documentation**: Check out the comprehensive documentation for more information:
-   - For usage details, refer to `docs/USER_GUIDE.md`.
-   - For common questions and technical details, see `docs/FAQ.md`.
+<p align="center">
+  <img src="assets/screenshots/01_main.png" alt="AutoSpanish Home Screen" width="320" />
+  <img src="assets/screenshots/02_study.png" alt="AutoSpanish Grammar Flashcard Screen" width="320" />
+</p>
 
-## Opening the project in Android Studio
+---
 
-1. Install Android Studio (Giraffe/Koala or newer) if you don't have it.
-2. `File > Open`, select the `AutoSpanish` folder (this folder, the one with `settings.gradle.kts`).
-3. Let Android Studio sync Gradle on first open. It uses its own bundled JDK 17 and Android SDK.
-   Android Studio regenerates `local.properties` to point at its own SDK automatically.
-4. If prompted to install a missing SDK platform/build-tools version, accept. The project targets
-   compileSdk/targetSdk 34, minSdk 26.
+## How to Use
 
-## Running on the Android emulator (from Android Studio)
+1. Download `AutoSpanish-Android.apk` from the table above on your Android device.
+2. Follow the [Android APK Installation Guide](docs/APK_INSTALLATION.md) to allow installing APKs and bypass Android Play Protect prompts.
+3. Type or scan a Spanish or English word on the Home screen to inspect gender, conjugations, examples, and false-friend hints.
+4. Save words into your study lists and practice directly with **Flashcards** or **Learn Mode**.
 
-1. `Tools > Device Manager > Create Device`, pick any phone profile, and download a system image
-   (API 26+; API 34 recommended) if you don't have one yet.
-2. Select the emulator from the device dropdown in the toolbar and press the green Run ▶ button
-   (or `Shift+F10`). Android Studio builds and installs the app on the emulator automatically.
+---
 
-## Installing the APK on a physical Android device
+## Key Features
 
-**Option A: copy and tap to install:**
-1. Copy `app-debug.apk` onto your phone (USB transfer, email to yourself, cloud drive, etc.).
-2. On the phone, open the file. Android will prompt to allow installs from that source
-   (Settings > Apps > Special access > Install unknown apps: enable it for whichever app opened
-   the file, e.g. Files or Chrome).
-3. Confirm the install prompt.
+- **Offline Spanish Dictionary**: Bundles ~78,900 English-Spanish headwords, conjugation tables, and curated irregular grammar rules without needing internet access.
+- **ML Kit & Online Fallback**: Downloads on-device ML Kit models in Settings or queries MyMemory when looking up rare multi-word phrases online.
+- **No-Deck List Study & Exports**: Study lists directly in Flashcards or Learn Mode and export lists to CSV, Quizlet text, PDF, or DOCX.
 
-**Option B: install via `adb` over USB:**
-1. On the phone: Settings > About phone > tap "Build number" 7 times to enable Developer Options,
-   then Settings > Developer Options > enable USB debugging.
-2. Connect the phone via USB and accept the "Allow USB debugging" prompt on the phone.
-3. From a terminal with `adb` on PATH (or via Android Studio's `Terminal` panel, or
-   `.toolchain/sdk/platform-tools/adb.exe` in this project):
-   ```
-   adb install app-debug.apk
-   ```
+---
 
-The app requests camera permission the first time you use the "scan text" (OCR) feature. Grant it
-when prompted. Everything else works fully offline once the curated dictionary is bundled; go to
-Settings inside the app to optionally download the offline ML Kit translation models for words
-outside the curated dictionary, or leave that step for later and use the app online (it works either
-way).
+## Safety & Disclaimers
 
-## Building a release APK (once you're ready to distribute)
+- **Official `main` Releases Only**: Download APKs exclusively from [DontKwo/AutoSpanish Releases](https://github.com/DontKwo/AutoSpanish/releases/latest) (`main` branch). Never install forked APK builds unless you are sure they contain no malware; only official `main` releases are maintained by the author, and I make no promises.
+- **Phone Security Warnings**: Your phone and Google Play Protect will likely warn that installing unknown APKs is unrecognized, unsafe, or not recommended. Bypassing these warnings is strictly at your own discretion using [Android APK Installation Guide](docs/APK_INSTALLATION.md).
+- **Educational & AS-IS Disclaimer**: Provided "AS IS" under the [MIT License](LICENSE) with zero warranty; automated translations, dictionary glosses, and grammar hints may contain mistakes and are used at your own risk.
 
-1. In Android Studio: `Build > Generate Signed Bundle / APK`, choose APK.
-2. Create a new keystore (or use an existing one) when prompted. Keep it and its passwords safe:
-   you'll need the same keystore for every future update.
-3. Choose the `release` build variant and finish. The signed APK lands in
-   `app/release/app-release.apk`.
+---
 
-## The built-in dictionary
+## Documentation
 
-`app/src/main/assets/dictionary.json` holds ~78,900 real Spanish headwords, generated directly from
-Kaikki.org's machine-readable extract of English Wiktionary
-(https://kaikki.org/dictionary/Spanish/), dual-licensed under Creative Commons
-Attribution-ShareAlike 4.0 and the GNU Free Documentation License. Every grammatical field is
-extracted straight from that source, never hand-authored: English glosses and part of speech
-(78,936 entries); noun gender (42,318); plural forms (41,786); gendered noun-pair forms such as
-profesor/profesora or actor/actriz, generalized to every noun the source pairs, not just a curated
-profession list (16,583 feminine, 238 masculine counterparts, 2,333 flagged as paired); adjective
-invariability and comparative forms such as mejor/peor/mayor/menor (7,764); full verb conjugation
-tables covering indicative, subjunctive, conditional, imperative, gerund and participle, including
-regional vos-forms, for every verb the source documents a table for (7,856); real usage example
-sentences with real English translations (11,203); and synonyms/antonyms (15,045 / 1,665) where
-Wiktionary editors recorded them. Words the source didn't document one of these fields for fall back
-to this app's own suffix/rule-based heuristics for that field only (see `GrammarEnricher.kt`) --
-never the reverse. A rare handful of identically-spelled Spanish homonyms with different genders per
-sense (e.g. "el radio" vs. "la radio") collapse to whichever sense Wiktionary documents more
-thoroughly, since the app stores one entry per spelling.
+### User Documentation
+- [User Guide](docs/USER_GUIDE.md)
+- [Android APK Installation Guide](docs/APK_INSTALLATION.md)
+- [Frequently Asked Questions](docs/FAQ.md)
 
-The other files under `app/src/main/assets/*.json` (irregular verbs, false friends, ser/estar
-adjectives, preposition pairings, regional variants, sentence frames) are curated grammar-rule
-fallbacks, not vocabulary: they only kick in for the minority of words/fields the sourced dictionary
-above doesn't cover. There is no separate gender-exceptions or adjective-exceptions file -- both are
-sourced directly from the dictionary entry, with the suffix heuristic only as a last resort. They're
-plain JSON and can be edited directly; rebuild afterward to pick up changes.
+### Developer Documentation
+- [Developer Guide](docs/DEVELOPMENT.md)
+- [Developer uv Installation](docs/UV_INSTALLATION.md)
 
-A word not found in the dictionary falls back to the on-device ML Kit translator, then (if online)
-the MyMemory API, with the same grammar rules applied automatically. When the direction is set to
-Auto and a single typed word can't be confidently placed in either language, the app asks directly
-rather than guessing.
+### AI, Technical & Reference Documentation
+- [AI Agent Reference](AGENTS.md)
 
-## Linguistic & Educational Disclaimer
-
-EDUCATIONAL DISCLAIMER: AutoSpanish is an open-source educational language learning framework. Linguistic models, vocabulary indices, and automated translations are provided AS IS without warranty of any kind.
+### Legal & Security Policies
+- [Security Policy](SECURITY.md)
+- [Third-Party Notices](THIRD_PARTY_NOTICES.md)
+- [MIT License](LICENSE)

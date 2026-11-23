@@ -1,0 +1,11 @@
+[linter]
+profile = "strict"
+level = "strict"
+diff_only = true
+disable = [46, 47]
+
+[project]
+single_os = "android"
+
+[ui]
+frameworks = []

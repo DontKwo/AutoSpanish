@@ -38,3 +38,10 @@ The following external dictionaries and linguistic datasets are included in this
 - **Source**: Pan-hispanic dialectology reference lists.
 - **License**: Public Domain / Permissive Educational Reference.
 - **Contents**: Lexical differences between common Latin American Spanish and Peninsular Spanish (Spain).
+
+## Related Documentation
+
+- [Project Overview](README.md)
+- [MIT License](LICENSE)
+- [User Guide](docs/USER_GUIDE.md)
+- [Security Policy](SECURITY.md)
