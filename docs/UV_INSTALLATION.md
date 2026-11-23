@@ -4,21 +4,23 @@
 
 Developers running strict repository lint checks and Markdown link validation (`ai-dev-tools`) use [Astral `uv`](https://docs.astral.sh/uv/).
 
-## Windows
+## Platform Instructions
+
+### Windows
 
 ```powershell
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 winget install --id=astral-sh.uv -e
 ```
 
-## macOS
+### macOS
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 brew install uv
 ```
 
-## Linux
+### Linux
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
