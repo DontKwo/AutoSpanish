@@ -11,23 +11,29 @@ import kotlinx.coroutines.tasks.await
 
 class MlKitTranslateService {
 
-    private val languageIdentifier = LanguageIdentification.getClient(
-        LanguageIdentificationOptions.Builder().setConfidenceThreshold(0.5f).build()
-    )
+    private val languageIdentifier by lazy {
+        LanguageIdentification.getClient(
+            LanguageIdentificationOptions.Builder().setConfidenceThreshold(0.5f).build()
+        )
+    }
 
-    private val esToEn = Translation.getClient(
-        TranslatorOptions.Builder()
-            .setSourceLanguage(TranslateLanguage.SPANISH)
-            .setTargetLanguage(TranslateLanguage.ENGLISH)
-            .build()
-    )
+    private val esToEn by lazy {
+        Translation.getClient(
+            TranslatorOptions.Builder()
+                .setSourceLanguage(TranslateLanguage.SPANISH)
+                .setTargetLanguage(TranslateLanguage.ENGLISH)
+                .build()
+        )
+    }
 
-    private val enToEs = Translation.getClient(
-        TranslatorOptions.Builder()
-            .setSourceLanguage(TranslateLanguage.ENGLISH)
-            .setTargetLanguage(TranslateLanguage.SPANISH)
-            .build()
-    )
+    private val enToEs by lazy {
+        Translation.getClient(
+            TranslatorOptions.Builder()
+                .setSourceLanguage(TranslateLanguage.ENGLISH)
+                .setTargetLanguage(TranslateLanguage.SPANISH)
+                .build()
+        )
+    }
 
     suspend fun downloadModels(): Boolean {
         return try {

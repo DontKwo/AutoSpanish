@@ -116,7 +116,8 @@ jobs:
           ./gradlew assembleRelease --console=plain
           rm -f "$KEYSTORE_TMP"
           APK_PATH="app/build/outputs/apk/release/app-release.apk"
-          CERT_INFO=$(keytool -printcert -jarfile "$APK_PATH")
+          APKSIGNER="$(ls -d "${ANDROID_HOME:-/usr/local/lib/android/sdk}"/build-tools/*/apksigner | sort -V | tail -n 1)"
+          CERT_INFO=$("$APKSIGNER" verify --print-certs "$APK_PATH")
           echo "$CERT_INFO"
           if echo "$CERT_INFO" | grep -q "CN=Android Debug"; then
             echo "ERROR: APK is signed with debug certificate" >&2
@@ -160,7 +161,7 @@ jobs:
 
   capture-screenshots:
     if: github.event_name == 'workflow_dispatch'
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -171,63 +172,13 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      - name: Build Debug APK for Screenshots
+      - name: Render Compose Screenshots via Robolectric Native Graphics
         run: |
           chmod +x ./gradlew
-          ./gradlew assembleDebug --console=plain
+          ./gradlew testDebugUnitTest --tests "com.autospanish.app.ui.ComposeScreenshotTest" --console=plain
 
-      - name: Capture Real Android Emulator Screenshots
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 33
-          target: default
-          arch: arm64-v8a
-          profile: pixel_6
-          emulator-options: -no-snapshot-save -no-window -noaudio -gpu host
-          script: |
-            set -e
-            mkdir -p captured-screenshots
-            adb install -r app/build/outputs/apk/debug/app-debug.apk
-            adb shell am start -n com.autospanish.app/.MainActivity
-            sleep 5
-            adb exec-out screencap -p > captured-screenshots/01_main.png
-            python3 - << 'EOF'
-            import re, subprocess, time, xml.etree.ElementTree as ET
-            def dump_nodes():
-                subprocess.run(["adb", "shell", "uiautomator", "dump", "/sdcard/ui.xml"], check=True)
-                xml_data = subprocess.check_output(["adb", "exec-out", "cat", "/sdcard/ui.xml"], text=True)
-                return ET.fromstring(xml_data)
-            def tap_match(root, targets):
-                for node in root.iter("node"):
-                    label = (node.attrib.get("text", "") + " " + node.attrib.get("content-desc", "")).strip()
-                    if any(t.lower() in label.lower() for t in targets):
-                        m = re.findall(r"\d+", node.attrib.get("bounds", ""))
-                        if len(m) == 4:
-                            cx = (int(m[0]) + int(m[2])) // 2
-                            cy = (int(m[1]) + int(m[3])) // 2
-                            subprocess.run(["adb", "shell", "input", "tap", str(cx), str(cy)], check=True)
-                            return True
-                return False
-            root = dump_nodes()
-            if tap_match(root, ["Add word"]):
-                time.sleep(2)
-                with open("captured-screenshots/02_add_word.png", "wb") as f:
-                    f.write(subprocess.check_output(["adb", "exec-out", "screencap", "-p"]))
-                root2 = dump_nodes()
-                if tap_match(root2, ["Cancel", "Navigate up", "Back"]):
-                    time.sleep(1)
-                else:
-                    subprocess.run(["adb", "shell", "input", "keyevent", "4"], check=False)
-                    time.sleep(1)
-            root3 = dump_nodes()
-            if tap_match(root3, ["All Words"]):
-                time.sleep(2)
-                with open("captured-screenshots/03_list.png", "wb") as f:
-                    f.write(subprocess.check_output(["adb", "exec-out", "screencap", "-p"]))
-            EOF
-
-      - name: Upload Emulator Screenshots
+      - name: Upload Rendered Screenshots
         uses: actions/upload-artifact@v4
         with:
-          name: emulator-screenshots
-          path: captured-screenshots/*.png
+          name: app-screenshots
+          path: app/build/screenshots/*.png

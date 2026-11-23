@@ -19,6 +19,8 @@ android {
     signingConfigs {
         create("release") {
             val ksPath = System.getenv("ANDROID_KEYSTORE_PATH")
+            enableV1Signing = true
+            enableV2Signing = true
             if (!ksPath.isNullOrBlank()) {
                 storeFile = file(ksPath)
                 storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: ""
@@ -97,6 +99,19 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.robolectric:robolectric:4.13")
+    testImplementation("androidx.test.ext:junit:1.1.5")
+    testImplementation(platform("androidx.compose:compose-bom:2024.02.00"))
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+}
+
+android {
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
