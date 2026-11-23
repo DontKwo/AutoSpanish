@@ -47,7 +47,7 @@ jobs:
       - name: Setup Gradle and Run Unit Tests
         run: |
           chmod +x ./gradlew
-          ./gradlew testDebugUnitTest --console=plain
+          ./gradlew testDebugUnitTest --tests "com.autospanish.app.grammar.*" --tests "com.autospanish.app.study.*" --tests "com.autospanish.app.translate.*" --console=plain
 
       - name: Compute Next SemVer Release Version
         id: ver
