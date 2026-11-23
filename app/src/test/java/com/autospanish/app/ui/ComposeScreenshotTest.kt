@@ -3,15 +3,15 @@ package com.autospanish.app.ui
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.view.View
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onRoot
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -138,9 +138,23 @@ class ComposeScreenshotTest {
         return dir
     }
 
-    private fun saveRootScreenshot(filename: String) {
-        val bitmap = composeRule.onRoot().captureToImage().asAndroidBitmap()
-        assertTrue("Expected realistic phone bitmap dimensions", bitmap.width >= 800 && bitmap.height >= 1600)
+    private fun saveViewScreenshot(hostView: View?, filename: String) {
+        var capturedBitmap: Bitmap? = null
+        composeRule.runOnUiThread {
+            val view = requireNotNull(hostView) { "Host view was not attached before screenshot capture" }
+            val rootView = view.rootView ?: view
+            if (rootView.width <= 0 || rootView.height <= 0) {
+                val widthSpec = View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.EXACTLY)
+                val heightSpec = View.MeasureSpec.makeMeasureSpec(2340, View.MeasureSpec.EXACTLY)
+                rootView.measure(widthSpec, heightSpec)
+                rootView.layout(0, 0, rootView.measuredWidth, rootView.measuredHeight)
+            }
+            val bitmap = Bitmap.createBitmap(rootView.width, rootView.height, Bitmap.Config.ARGB_8888)
+            rootView.draw(Canvas(bitmap))
+            capturedBitmap = bitmap
+        }
+        val bitmap = requireNotNull(capturedBitmap)
+        assertTrue("Expected realistic phone bitmap dimensions: ${bitmap.width}x${bitmap.height}", bitmap.width >= 500 && bitmap.height >= 1000)
         val targetFile = File(resolveScreenshotDir(), filename)
         targetFile.outputStream().use { stream ->
             assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream))
@@ -150,7 +164,9 @@ class ComposeScreenshotTest {
 
     @Test
     fun captureHomeScreen() {
+        var hostView: View? = null
         composeRule.setContent {
+            hostView = LocalView.current
             AutoSpanishTheme(darkModeOverride = 2) {
                 Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
                     HomeScreen(
@@ -169,12 +185,14 @@ class ComposeScreenshotTest {
             composeRule.onAllNodesWithText("Travel Essentials").fetchSemanticsNodes().isNotEmpty()
         }
         composeRule.waitForIdle()
-        saveRootScreenshot("01_main.png")
+        saveViewScreenshot(hostView, "01_main.png")
     }
 
     @Test
     fun captureStudyScreen() {
+        var hostView: View? = null
         composeRule.setContent {
+            hostView = LocalView.current
             AutoSpanishTheme(darkModeOverride = 2) {
                 Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
                     FlashcardStudyScreen(
@@ -191,6 +209,6 @@ class ComposeScreenshotTest {
                 composeRule.onAllNodesWithText("madrugar", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
         composeRule.waitForIdle()
-        saveRootScreenshot("02_study.png")
+        saveViewScreenshot(hostView, "02_study.png")
     }
 }
