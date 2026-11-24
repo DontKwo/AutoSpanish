@@ -44,14 +44,6 @@ AutoSpanish ships with ~78,900 Wiktionary-derived Spanish headwords covering nou
 
 ---
 
-## Safety & Disclaimers
-
-- **Official `main` Releases Only**: Download APKs exclusively from [DontKwo/AutoSpanish Releases](https://github.com/DontKwo/AutoSpanish/releases/latest) (`main` branch). Never install forked APK builds unless you are sure they contain no malware; only official `main` releases are maintained by the author, and I make no promises.
-- **Phone Security Warnings**: Your phone and Google Play Protect will likely warn that installing unknown APKs is unrecognized, unsafe, or not recommended. Bypassing these warnings is strictly at your own discretion using [Android APK Installation Guide](docs/APK_INSTALLATION.md).
-- **Educational & AS-IS Disclaimer**: Provided "AS IS" under the [MIT License](LICENSE) with zero warranty; automated translations, dictionary glosses, and grammar hints may contain mistakes and are used at your own risk.
-
----
-
 ## Documentation
 
 ### User Documentation
@@ -63,10 +55,18 @@ AutoSpanish ships with ~78,900 Wiktionary-derived Spanish headwords covering nou
 - [Developer Guide](docs/DEVELOPMENT.md)
 - [Developer uv Installation](docs/UV_INSTALLATION.md)
 
-### AI, Technical & Reference Documentation
+### AI & Technical Documentation
 - [AI Agent Reference](AGENTS.md)
 
 ### Legal & Security Policies
 - [Security Policy](SECURITY.md)
 - [Third-Party Notices](THIRD_PARTY_NOTICES.md)
 - [MIT License](LICENSE)
+
+---
+
+## Safety & Disclaimers
+
+- **Official `main` Releases Only**: Download APKs exclusively from [DontKwo/AutoSpanish Releases](https://github.com/DontKwo/AutoSpanish/releases/latest) (`main` branch). Never install forked APK builds unless you are sure they contain no malware; only official `main` releases are maintained by the author, and I make no promises.
+- **Phone Security Warnings**: Your phone and Google Play Protect will likely warn that installing unknown APKs is unrecognized, unsafe, or not recommended. Bypassing these warnings is strictly at your own discretion using [Android APK Installation Guide](docs/APK_INSTALLATION.md).
+- **Educational & AS-IS Disclaimer**: Provided "AS IS" under the [MIT License](LICENSE) with zero warranty; automated translations, dictionary glosses, and grammar hints may contain mistakes and are used at your own risk.
